@@ -255,6 +255,32 @@ Public Class Form1
 
     End Function
 
+    Private Function CheckCorner(ci As Integer, cj As Integer)
+
+        Dim c As Integer
+
+        c = 0
+
+        If (PlayMatrix(ci, cj) = "e") Then
+
+            For i = 0 To 2
+                If PlayMatrix(i, cj) = "b" Then
+                    c = c + 1
+                End If
+            Next
+
+            For j = 0 To 2
+                If PlayMatrix(ci, j) = "b" Then
+                    c = c + 1
+                End If
+            Next
+
+        End If
+
+        Return c
+
+    End Function
+
     Private Sub ComputerPlay()
 
         Dim i, j As Integer
@@ -271,6 +297,45 @@ Public Class Form1
             Return
         End If
 
+        ' Third check corners
+        If (PlayMatrix(0, 0) = "b" And PlayMatrix(2, 2) = "b") Then
+            If (PlayMatrix(0, 1) = "e") Then
+                PlayPosition(0, 1)
+                Return
+            End If
+            If (PlayMatrix(1, 2) = "e") Then
+                PlayPosition(1, 2)
+                Return
+            End If
+            If (PlayMatrix(1, 0) = "e") Then
+                PlayPosition(1, 0)
+                Return
+            End If
+            If (PlayMatrix(2, 1) = "e") Then
+                PlayPosition(2, 1)
+                Return
+            End If
+        End If
+
+        If (PlayMatrix(2, 0) = "b" And PlayMatrix(0, 2) = "b") Then
+            If (PlayMatrix(0, 1) = "e") Then
+                PlayPosition(0, 1)
+                Return
+            End If
+            If (PlayMatrix(1, 2) = "e") Then
+                PlayPosition(1, 2)
+                Return
+            End If
+            If (PlayMatrix(1, 0) = "e") Then
+                PlayPosition(1, 0)
+                Return
+            End If
+            If (PlayMatrix(2, 1) = "e") Then
+                PlayPosition(2, 1)
+                Return
+            End If
+        End If
+
         'Third play middle
         If (PlayMatrix(1, 1) = "e") Then
 
@@ -280,32 +345,31 @@ Public Class Form1
         End If
 
         'Fourth play corners
-        If (PlayMatrix(0, 0) = "e") Then
+        Dim c1, c2, c3, c4 As Integer
 
+        c1 = CheckCorner(0, 0)
+        c2 = CheckCorner(0, 2)
+        c3 = CheckCorner(2, 2)
+        c4 = CheckCorner(2, 0)
+
+        If (c1 >= c2 And c1 >= c3 And c1 >= c4) Then
             PlayPosition(0, 0)
             Return
-
         End If
 
-        If (PlayMatrix(0, 2) = "e") Then
-
+        If (c2 >= c1 And c2 >= c3 And c2 >= c4) Then
             PlayPosition(0, 2)
             Return
-
         End If
 
-        If (PlayMatrix(2, 2) = "e") Then
-
+        If (c3 >= c1 And c3 >= c2 And c3 >= c4) Then
             PlayPosition(2, 2)
             Return
-
         End If
 
-        If (PlayMatrix(2, 0) = "e") Then
-
+        If (c4 >= c1 And c4 >= c2 And c4 >= c3) Then
             PlayPosition(2, 0)
             Return
-
         End If
 
         ' Fifth play middle edges
@@ -423,108 +487,126 @@ Public Class Form1
     Private Sub PictureBox1_MouseEnter(sender As Object, e As EventArgs) Handles PictureBox1.MouseEnter
 
         PlayImage(0, 0).BackColor = Color.LightGray
+        ToolStripStatusLabel1.Text = "(0, 0)"
 
     End Sub
 
     Private Sub PictureBox1_MouseLeave(sender As Object, e As EventArgs) Handles PictureBox1.MouseLeave
 
         PlayImage(0, 0).BackColor = Control.DefaultBackColor
+        ToolStripStatusLabel1.Text = ""
 
     End Sub
 
     Private Sub PictureBox2_MouseEnter(sender As Object, e As EventArgs) Handles PictureBox2.MouseEnter
 
         PlayImage(0, 1).BackColor = Color.LightGray
+        ToolStripStatusLabel1.Text = "(0, 1)"
 
     End Sub
 
     Private Sub PictureBox2_MouseLeave(sender As Object, e As EventArgs) Handles PictureBox2.MouseLeave
 
         PlayImage(0, 1).BackColor = Control.DefaultBackColor
+        ToolStripStatusLabel1.Text = ""
 
     End Sub
 
     Private Sub PictureBox3_MouseEnter(sender As Object, e As EventArgs) Handles PictureBox3.MouseEnter
 
         PlayImage(0, 2).BackColor = Color.LightGray
+        ToolStripStatusLabel1.Text = "(0, 2)"
 
     End Sub
 
     Private Sub PictureBox3_MouseLeave(sender As Object, e As EventArgs) Handles PictureBox3.MouseLeave
 
         PlayImage(0, 2).BackColor = Control.DefaultBackColor
+        ToolStripStatusLabel1.Text = ""
 
     End Sub
 
     Private Sub PictureBox4_MouseEnter(sender As Object, e As EventArgs) Handles PictureBox4.MouseEnter
 
         PlayImage(1, 0).BackColor = Color.LightGray
+        ToolStripStatusLabel1.Text = "(1, 0)"
 
     End Sub
 
     Private Sub PictureBox4_MouseLeave(sender As Object, e As EventArgs) Handles PictureBox4.MouseLeave
 
         PlayImage(1, 0).BackColor = Control.DefaultBackColor
+        ToolStripStatusLabel1.Text = ""
 
     End Sub
 
     Private Sub PictureBox5_MouseEnter(sender As Object, e As EventArgs) Handles PictureBox5.MouseEnter
 
         PlayImage(1, 1).BackColor = Color.LightGray
+        ToolStripStatusLabel1.Text = "(1, 1)"
 
     End Sub
 
     Private Sub PictureBox5_MouseLeave(sender As Object, e As EventArgs) Handles PictureBox5.MouseLeave
 
         PlayImage(1, 1).BackColor = Control.DefaultBackColor
-        
+        ToolStripStatusLabel1.Text = ""
+
     End Sub
 
     Private Sub PictureBox6_MouseEnter(sender As Object, e As EventArgs) Handles PictureBox6.MouseEnter
 
         PlayImage(1, 2).BackColor = Color.LightGray
+        ToolStripStatusLabel1.Text = "(1, 2)"
 
     End Sub
 
     Private Sub PictureBox6_MouseLeave(sender As Object, e As EventArgs) Handles PictureBox6.MouseLeave
 
         PlayImage(1, 2).BackColor = Control.DefaultBackColor
+        ToolStripStatusLabel1.Text = ""
 
     End Sub
 
     Private Sub PictureBox7_MouseEnter(sender As Object, e As EventArgs) Handles PictureBox7.MouseEnter
 
         PlayImage(2, 0).BackColor = Color.LightGray
+        ToolStripStatusLabel1.Text = "(2, 0)"
 
     End Sub
 
     Private Sub PictureBox7_MouseLeave(sender As Object, e As EventArgs) Handles PictureBox7.MouseLeave
 
         PlayImage(2, 0).BackColor = Control.DefaultBackColor
+        ToolStripStatusLabel1.Text = ""
 
     End Sub
 
     Private Sub PictureBox8_MouseEnter(sender As Object, e As EventArgs) Handles PictureBox8.MouseEnter
 
         PlayImage(2, 1).BackColor = Color.LightGray
+        ToolStripStatusLabel1.Text = "(2, 1)"
 
     End Sub
 
     Private Sub PictureBox8_MouseLeave(sender As Object, e As EventArgs) Handles PictureBox8.MouseLeave
 
         PlayImage(2, 1).BackColor = Control.DefaultBackColor
+        ToolStripStatusLabel1.Text = ""
 
     End Sub
 
     Private Sub PictureBox9_MouseEnter(sender As Object, e As EventArgs) Handles PictureBox9.MouseEnter
 
         PlayImage(2, 2).BackColor = Color.LightGray
+        ToolStripStatusLabel1.Text = "(2, 2)"
 
     End Sub
 
     Private Sub PictureBox9_MouseLeave(sender As Object, e As EventArgs) Handles PictureBox9.MouseLeave
 
         PlayImage(2, 2).BackColor = Control.DefaultBackColor
+        ToolStripStatusLabel1.Text = ""
 
     End Sub
 
