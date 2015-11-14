@@ -1,19 +1,38 @@
-﻿
+﻿Imports System.Threading
+
 Public Class Form1
 
     Dim PlayMatrix(2, 2) As Char
     Dim PlayImage(2, 2) As PictureBox
-    Dim LastPlay As Char
+    Dim LastPlayer As Char
+    Dim CurrentPlayer As Char
     Dim StopPlaying As Boolean
     Dim PlayAgainstCPU As Boolean
+    Dim CPUvsCPUMode As Boolean
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
+        CPUvsCPUMode = False
+
+    End Sub
+
+    Private Sub Form1_Shown(sender As Object, e As EventArgs) Handles MyBase.Shown
+
         ReloadGame()
+
+        If CPUvsCPUMode Then
+            Application.DoEvents()
+            Thread.Sleep(1000)
+
+            RandomPlay()
+        End If
 
     End Sub
 
     Private Sub ReloadGame()
+
+        CurrentPlayer = "b"
+        LastPlayer = "r"
 
         PlayImage(0, 0) = PictureBox1
         PlayImage(0, 1) = PictureBox2
@@ -24,8 +43,6 @@ Public Class Form1
         PlayImage(2, 0) = PictureBox7
         PlayImage(2, 1) = PictureBox8
         PlayImage(2, 2) = PictureBox9
-
-        LastPlay = "r"
 
         For i = 0 To 2
             For j = 0 To 2
@@ -39,11 +56,36 @@ Public Class Form1
 
     End Sub
 
+    Public Function GetRandom(ByVal Min As Integer, ByVal Max As Integer) As Integer
+        Static Generator As System.Random = New System.Random()
+        Return Generator.Next(Min, Max)
+    End Function
+
+    Private Sub RandomPlay()
+
+        PlayPosition(GetRandom(0, 3), GetRandom(0, 3))
+
+    End Sub
+
+    Private Sub StopPlay()
+
+        If CPUvsCPUMode Then
+            Application.DoEvents()
+            Thread.Sleep(2000)
+            ReloadGame()
+
+            RandomPlay()
+        Else
+            StopPlaying = True
+        End If
+
+    End Sub
+
     Private Sub DrawGame()
 
         ListBox1.Items.Insert(0, "Draw game.")
         My.Computer.Audio.Play(My.Resources.boring, AudioPlayMode.Background)
-        StopPlaying = True
+        StopPlay()
 
     End Sub
 
@@ -56,7 +98,7 @@ Public Class Form1
             Else
                 My.Computer.Audio.Play(My.Resources.woohoo, AudioPlayMode.Background)
             End If
-            StopPlaying = True
+            StopPlay()
         ElseIf (Player = "r") Then
             ListBox1.Items.Insert(0, "Player red wins.")
             If (PlayAgainstCPU) Then
@@ -64,56 +106,42 @@ Public Class Form1
             Else
                 My.Computer.Audio.Play(My.Resources.woohoo, AudioPlayMode.Background)
             End If
-            StopPlaying = True
+            StopPlay()
         End If
 
     End Sub
 
-    Private Sub CheckBoard()
+    Private Sub CheckPlayerHasWon(Player As Char)
 
         For i = 0 To 2
-            If (PlayMatrix(i, 0) = "r") And (PlayMatrix(i, 1) = "r") And (PlayMatrix(i, 2) = "r") Then
-                PlayerWins("r")
-                Return
-            End If
-            If (PlayMatrix(i, 0) = "b") And (PlayMatrix(i, 1) = "b") And (PlayMatrix(i, 2) = "b") Then
-                PlayerWins("b")
+            If (PlayMatrix(i, 0) = Player) And (PlayMatrix(i, 1) = Player) And (PlayMatrix(i, 2) = Player) Then
+                PlayerWins(Player)
                 Return
             End If
         Next
 
         For j = 0 To 2
-            If (PlayMatrix(0, j) = "r") And (PlayMatrix(1, j) = "r") And (PlayMatrix(2, j) = "r") Then
-                PlayerWins("r")
-                Return
-            End If
-            If (PlayMatrix(0, j) = "b") And (PlayMatrix(1, j) = "b") And (PlayMatrix(2, j) = "b") Then
-                PlayerWins("b")
+            If (PlayMatrix(0, j) = Player) And (PlayMatrix(1, j) = Player) And (PlayMatrix(2, j) = Player) Then
+                PlayerWins(Player)
                 Return
             End If
         Next
 
-        If (PlayMatrix(0, 0) = "r") And (PlayMatrix(1, 1) = "r") And (PlayMatrix(2, 2) = "r") Then
-            PlayerWins("r")
+        If (PlayMatrix(0, 0) = Player) And (PlayMatrix(1, 1) = Player) And (PlayMatrix(2, 2) = Player) Then
+            PlayerWins(Player)
             Return
         End If
 
-        If (PlayMatrix(0, 2) = "r") And (PlayMatrix(1, 1) = "r") And (PlayMatrix(2, 0) = "r") Then
-            PlayerWins("r")
+        If (PlayMatrix(0, 2) = Player) And (PlayMatrix(1, 1) = Player) And (PlayMatrix(2, 0) = Player) Then
+            PlayerWins(Player)
             Return
         End If
 
-        If (PlayMatrix(0, 0) = "b") And (PlayMatrix(1, 1) = "b") And (PlayMatrix(2, 2) = "b") Then
-            PlayerWins("b")
-            Return
-        End If
+    End Sub
 
-        If (PlayMatrix(0, 2) = "b") And (PlayMatrix(1, 1) = "b") And (PlayMatrix(2, 0) = "b") Then
-            PlayerWins("b")
-            Return
-        End If
+    Private Sub CheckDrawGame()
 
-        If (Not StopPlaying)
+        If (Not StopPlaying) Then
 
             Dim c As Integer
 
@@ -131,11 +159,12 @@ Public Class Form1
                 DrawGame()
                 Return
             End If
+
         End If
 
     End Sub
 
-    Private Function CheckPlayerWin(Player As Char, ByRef ii As Integer, ByRef jj As Integer) As Boolean
+    Private Function CheckPlayerWinsNextMove(Player As Char, ByRef ii As Integer, ByRef jj As Integer) As Boolean
 
         Dim p, e As Integer
         Dim j As Integer
@@ -255,7 +284,7 @@ Public Class Form1
 
     End Function
 
-    Private Function CheckCorner(ci As Integer, cj As Integer)
+    Private Function CheckCorner(Player As Char, ci As Integer, cj As Integer)
 
         Dim c As Integer
 
@@ -264,13 +293,13 @@ Public Class Form1
         If (PlayMatrix(ci, cj) = "e") Then
 
             For i = 0 To 2
-                If PlayMatrix(i, cj) = "b" Then
+                If PlayMatrix(i, cj) = Player Then
                     c = c + 1
                 End If
             Next
 
             For j = 0 To 2
-                If PlayMatrix(ci, j) = "b" Then
+                If PlayMatrix(ci, j) = Player Then
                     c = c + 1
                 End If
             Next
@@ -281,24 +310,24 @@ Public Class Form1
 
     End Function
 
-    Private Sub ComputerPlay()
+    Private Sub ComputerPlay(Player As Char, Opponent As Char)
 
         Dim i, j As Integer
 
         'First try to win
-        If (CheckPlayerWin("r", i, j)) Then
+        If (CheckPlayerWinsNextMove(Player, i, j)) Then
             PlayPosition(i, j)
             Return
         End If
 
         'Second stop opponent
-        If (CheckPlayerWin("b", i, j)) Then
+        If (CheckPlayerWinsNextMove(Opponent, i, j)) Then
             PlayPosition(i, j)
             Return
         End If
 
         ' Third check corners
-        If (PlayMatrix(0, 0) = "b" And PlayMatrix(2, 2) = "b") Then
+        If (PlayMatrix(0, 0) = Opponent And PlayMatrix(2, 2) = Opponent) Then
             If (PlayMatrix(0, 1) = "e") Then
                 PlayPosition(0, 1)
                 Return
@@ -317,7 +346,7 @@ Public Class Form1
             End If
         End If
 
-        If (PlayMatrix(2, 0) = "b" And PlayMatrix(0, 2) = "b") Then
+        If (PlayMatrix(2, 0) = Opponent And PlayMatrix(0, 2) = Opponent) Then
             If (PlayMatrix(0, 1) = "e") Then
                 PlayPosition(0, 1)
                 Return
@@ -336,94 +365,117 @@ Public Class Form1
             End If
         End If
 
-        'Third play middle
+        'Fourth play middle
         If (PlayMatrix(1, 1) = "e") Then
-
             PlayPosition(1, 1)
             Return
-
         End If
 
-        'Fourth play corners
+        'Fifth play corners
         Dim c1, c2, c3, c4 As Integer
 
-        c1 = CheckCorner(0, 0)
-        c2 = CheckCorner(0, 2)
-        c3 = CheckCorner(2, 2)
-        c4 = CheckCorner(2, 0)
+        c1 = CheckCorner(Opponent, 0, 0)
+        c2 = CheckCorner(Opponent, 0, 2)
+        c3 = CheckCorner(Opponent, 2, 2)
+        c4 = CheckCorner(Opponent, 2, 0)
 
-        If (c1 >= c2 And c1 >= c3 And c1 >= c4) Then
+        If (PlayMatrix(0, 0) = "e" And c1 >= c2 And c1 >= c3 And c1 >= c4) Then
             PlayPosition(0, 0)
             Return
         End If
 
-        If (c2 >= c1 And c2 >= c3 And c2 >= c4) Then
+        If (PlayMatrix(0, 2) = "e" And c2 >= c1 And c2 >= c3 And c2 >= c4) Then
             PlayPosition(0, 2)
             Return
         End If
 
-        If (c3 >= c1 And c3 >= c2 And c3 >= c4) Then
+        If (PlayMatrix(2, 2) = "e" And c3 >= c1 And c3 >= c2 And c3 >= c4) Then
             PlayPosition(2, 2)
             Return
         End If
 
-        If (c4 >= c1 And c4 >= c2 And c4 >= c3) Then
+        If (PlayMatrix(2, 0) = "e" And c4 >= c1 And c4 >= c2 And c4 >= c3) Then
             PlayPosition(2, 0)
             Return
         End If
 
-        ' Fifth play middle edges
+        ' Six play middle edges
         If (PlayMatrix(0, 1) = "e") Then
-
             PlayPosition(0, 1)
             Return
-
         End If
 
         If (PlayMatrix(1, 2) = "e") Then
-
             PlayPosition(1, 2)
             Return
-
         End If
 
         If (PlayMatrix(2, 1) = "e") Then
-
             PlayPosition(2, 1)
             Return
-
         End If
 
         If (PlayMatrix(1, 0) = "e") Then
-
             PlayPosition(1, 0)
             Return
-
         End If
+
+        ' Play anywhere
+        For i = 0 To 2
+            For j = 0 To 2
+                If PlayMatrix(i, j) = "e" Then
+                    PlayPosition(i, j)
+                    Return
+                End If
+            Next
+        Next
 
     End Sub
 
     Private Sub PlayPosition(i As Integer, j As Integer)
 
+        Dim AuxPlayer As Char
+
         If (PlayMatrix(i, j) = "e") And Not StopPlaying Then
 
-            If (LastPlay = "r") Then
+            If (LastPlayer = "r") Then
                 PlayMatrix(i, j) = "b"
                 PlayImage(i, j).Image = My.Resources.blue
-                LastPlay = "b"
-            ElseIf (LastPlay = "b") Then
+                LastPlayer = "b"
+            ElseIf (LastPlayer = "b") Then
                 PlayMatrix(i, j) = "r"
                 PlayImage(i, j).Image = My.Resources.red
-                LastPlay = "r"
+                LastPlayer = "r"
             End If
 
-            CheckBoard()
+            CheckPlayerHasWon("r")
+            CheckPlayerHasWon("b")
 
-            If (PlayAgainstCPU And LastPlay = "b") Then
+            CheckDrawGame()
 
-                ComputerPlay()
+            If (CPUvsCPUMode) Then
+
+                Application.DoEvents()
+                Thread.Sleep(250)
+
+                ComputerPlay(CurrentPlayer, LastPlayer)
+
+                ' Swap Players
+                AuxPlayer = CurrentPlayer
+                CurrentPlayer = LastPlayer
+                LastPlayer = AuxPlayer
+
+            Else
+
+                If (PlayAgainstCPU And LastPlayer = "b") Then
+
+                    ComputerPlay(CurrentPlayer, LastPlayer)
+
+                End If
 
             End If
+
+            Application.DoEvents()
 
         End If
 
@@ -621,5 +673,6 @@ Public Class Form1
         PlayAgainstCPU = CheckBox1.Checked
 
     End Sub
+
 
 End Class
