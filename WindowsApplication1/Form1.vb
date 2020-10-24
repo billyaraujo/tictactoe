@@ -167,7 +167,7 @@ Public Class Form1
     Private Function CheckPlayerWinsNextMove(Player As Char, ByRef ii As Integer, ByRef jj As Integer) As Boolean
 
         Dim p, e As Integer
-        Dim j As Integer
+        Dim i, j As Integer
 
         ' Check rows
         For i = 0 To 2
@@ -442,10 +442,12 @@ Public Class Form1
                 PlayMatrix(i, j) = "b"
                 PlayImage(i, j).Image = My.Resources.blue
                 LastPlayer = "b"
+                CurrentPlayer = "r"
             ElseIf (LastPlayer = "b") Then
                 PlayMatrix(i, j) = "r"
                 PlayImage(i, j).Image = My.Resources.red
                 LastPlayer = "r"
+                CurrentPlayer = "b"
             End If
 
             CheckPlayerHasWon("r")
