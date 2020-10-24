@@ -1,3 +1,3 @@
 # TicTacToe
-Very basic tictactoe for educational purposes
+Very basic Tic-Tac-Toe for educational purposes
 
